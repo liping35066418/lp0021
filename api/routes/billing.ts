@@ -145,31 +145,6 @@ router.get('/overdue-list', authenticateToken, requireRoles('super_admin', 'prop
   }
 });
 
-router.get('/:id', authenticateToken, requireOwnerOrAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const bill = await billService.getById(id);
-
-    if (!bill) {
-      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
-      res.status(404).json(errorResponse('账单不存在'));
-      return;
-    }
-
-    if (req.user?.role === 'owner' && bill.ownerId !== req.user.ownerId) {
-      logger.warn('billing', '业主尝试访问其他业主账单', { userId: req.user?.id, targetOwnerId: bill.ownerId });
-      res.status(403).json(errorResponse('只能访问自己的账单'));
-      return;
-    }
-
-    logger.info('billing', '查询账单详情', { id, userId: req.user?.id });
-    res.json(successResponse(bill));
-  } catch (error) {
-    logger.error('billing', '查询账单详情失败', { error, userId: req.user?.id });
-    res.status(500).json(errorResponse('查询账单详情失败'));
-  }
-});
-
 router.post('/', authenticateToken, requireRoles('super_admin', 'property_staff'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { ownerId, houseId, parkingSpotId, type, title, amount, billingPeriod, dueDate, remark } = req.body;
@@ -213,140 +188,6 @@ router.post('/', authenticateToken, requireRoles('super_admin', 'property_staff'
   } catch (error) {
     logger.error('billing', '创建账单失败', { error, userId: req.user?.id });
     res.status(500).json(errorResponse('创建账单失败'));
-  }
-});
-
-router.put('/:id', authenticateToken, requireRoles('super_admin', 'property_staff'), async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const { title, amount, billingPeriod, dueDate, status, remark } = req.body;
-
-    const existingBill = await billService.getById(id);
-    if (!existingBill) {
-      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
-      res.status(404).json(errorResponse('账单不存在'));
-      return;
-    }
-
-    if (existingBill.status === 'paid' && amount !== undefined && amount !== existingBill.amount) {
-      logger.warn('billing', '已支付账单不能修改金额', { id, userId: req.user?.id });
-      res.status(400).json(errorResponse('已支付账单不能修改金额'));
-      return;
-    }
-
-    const updateData: Partial<Bill> = {};
-    if (title !== undefined) updateData.title = title;
-    if (amount !== undefined) updateData.amount = Number(amount);
-    if (billingPeriod !== undefined) updateData.billingPeriod = billingPeriod;
-    if (dueDate !== undefined) updateData.dueDate = dueDate;
-    if (status !== undefined) updateData.status = status;
-    if (remark !== undefined) updateData.remark = remark;
-
-    const updatedBill = await billService.update(id, updateData, req.user?.id);
-
-    logger.info('billing', '更新账单成功', { id, userId: req.user?.id });
-    res.json(successResponse(updatedBill));
-  } catch (error) {
-    logger.error('billing', '更新账单失败', { error, userId: req.user?.id });
-    res.status(500).json(errorResponse('更新账单失败'));
-  }
-});
-
-router.put('/:id/recalculate', authenticateToken, requireRoles('super_admin'), async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const existingBill = await billService.getById(id);
-    if (!existingBill) {
-      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
-      res.status(404).json(errorResponse('账单不存在'));
-      return;
-    }
-
-    if (existingBill.status === 'paid') {
-      logger.warn('billing', '已支付账单不能重算', { id, userId: req.user?.id });
-      res.status(400).json(errorResponse('已支付账单不能重算'));
-      return;
-    }
-
-    let newAmount = existingBill.amount;
-    const houses = readJsonFile<House[]>('houses.json') || [];
-    const parkingSpots = readJsonFile<ParkingSpot[]>('parking_spots.json') || [];
-
-    if (existingBill.type === 'property_fee' && existingBill.houseId) {
-      const house = houses.find(h => h.id === existingBill.houseId);
-      if (house) {
-        newAmount = calculatePropertyFee(house.area, 2.5);
-      }
-    } else if (existingBill.type === 'water_fee') {
-      newAmount = calculateWaterFee(9.16, 5.0);
-    } else if (existingBill.type === 'electric_fee') {
-      newAmount = calculateElectricFee(229.5, 0.56);
-    } else if (existingBill.type === 'parking_fee' && existingBill.parkingSpotId) {
-      const spot = parkingSpots.find(p => p.id === existingBill.parkingSpotId);
-      if (spot) {
-        newAmount = spot.monthlyFee;
-      }
-    }
-
-    const oldAmount = existingBill.amount;
-    const updatedBill = await billService.update(id, { amount: newAmount }, req.user?.id);
-
-    logOperation('billing', 'recalculate', req.user?.id, {
-      id,
-      billNo: existingBill.billNo,
-      oldAmount,
-      newAmount,
-    });
-
-    logger.info('billing', '账单重算成功', { id, oldAmount, newAmount, userId: req.user?.id });
-    res.json(successResponse({
-      ...updatedBill,
-      oldAmount,
-      newAmount,
-    }));
-  } catch (error) {
-    logger.error('billing', '账单重算失败', { error, userId: req.user?.id });
-    res.status(500).json(errorResponse('账单重算失败'));
-  }
-});
-
-router.put('/:id/cancel', authenticateToken, requireRoles('super_admin'), async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const existingBill = await billService.getById(id);
-    if (!existingBill) {
-      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
-      res.status(404).json(errorResponse('账单不存在'));
-      return;
-    }
-
-    if (existingBill.status === 'paid' || existingBill.status === 'refunded') {
-      logger.warn('billing', '已支付/已退款账单不能取消', { id, userId: req.user?.id });
-      res.status(400).json(errorResponse('已支付/已退款账单不能取消'));
-      return;
-    }
-
-    if (existingBill.status === 'cancelled') {
-      logger.warn('billing', '账单已取消', { id, userId: req.user?.id });
-      res.status(400).json(errorResponse('账单已取消'));
-      return;
-    }
-
-    const cancelledBill = await billService.update(id, { status: 'cancelled' }, req.user?.id);
-
-    logOperation('billing', 'cancel', req.user?.id, {
-      id,
-      billNo: existingBill.billNo,
-      amount: existingBill.amount,
-    });
-
-    logger.info('billing', '取消账单成功', { id, userId: req.user?.id });
-    res.json(successResponse(cancelledBill));
-  } catch (error) {
-    logger.error('billing', '取消账单失败', { error, userId: req.user?.id });
-    res.status(500).json(errorResponse('取消账单失败'));
   }
 });
 
@@ -988,6 +829,165 @@ router.get('/payments/:id', authenticateToken, async (req: AuthRequest, res: Res
   } catch (error) {
     logger.error('billing', '查询缴费记录详情失败', { error, userId: req.user?.id });
     res.status(500).json(errorResponse('查询缴费记录详情失败'));
+  }
+});
+
+router.get('/:id', authenticateToken, requireOwnerOrAdmin, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const bill = await billService.getById(id);
+
+    if (!bill) {
+      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
+      res.status(404).json(errorResponse('账单不存在'));
+      return;
+    }
+
+    if (req.user?.role === 'owner' && bill.ownerId !== req.user.ownerId) {
+      logger.warn('billing', '业主尝试访问其他业主账单', { userId: req.user?.id, targetOwnerId: bill.ownerId });
+      res.status(403).json(errorResponse('只能访问自己的账单'));
+      return;
+    }
+
+    logger.info('billing', '查询账单详情', { id, userId: req.user?.id });
+    res.json(successResponse(bill));
+  } catch (error) {
+    logger.error('billing', '查询账单详情失败', { error, userId: req.user?.id });
+    res.status(500).json(errorResponse('查询账单详情失败'));
+  }
+});
+
+router.put('/:id', authenticateToken, requireRoles('super_admin', 'property_staff'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, amount, billingPeriod, dueDate, status, remark } = req.body;
+
+    const existingBill = await billService.getById(id);
+    if (!existingBill) {
+      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
+      res.status(404).json(errorResponse('账单不存在'));
+      return;
+    }
+
+    if (existingBill.status === 'paid' && amount !== undefined && amount !== existingBill.amount) {
+      logger.warn('billing', '已支付账单不能修改金额', { id, userId: req.user?.id });
+      res.status(400).json(errorResponse('已支付账单不能修改金额'));
+      return;
+    }
+
+    const updateData: Partial<Bill> = {};
+    if (title !== undefined) updateData.title = title;
+    if (amount !== undefined) updateData.amount = Number(amount);
+    if (billingPeriod !== undefined) updateData.billingPeriod = billingPeriod;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
+    if (status !== undefined) updateData.status = status;
+    if (remark !== undefined) updateData.remark = remark;
+
+    const updatedBill = await billService.update(id, updateData, req.user?.id);
+
+    logger.info('billing', '更新账单成功', { id, userId: req.user?.id });
+    res.json(successResponse(updatedBill));
+  } catch (error) {
+    logger.error('billing', '更新账单失败', { error, userId: req.user?.id });
+    res.status(500).json(errorResponse('更新账单失败'));
+  }
+});
+
+router.put('/:id/recalculate', authenticateToken, requireRoles('super_admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const existingBill = await billService.getById(id);
+    if (!existingBill) {
+      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
+      res.status(404).json(errorResponse('账单不存在'));
+      return;
+    }
+
+    if (existingBill.status === 'paid') {
+      logger.warn('billing', '已支付账单不能重算', { id, userId: req.user?.id });
+      res.status(400).json(errorResponse('已支付账单不能重算'));
+      return;
+    }
+
+    let newAmount = existingBill.amount;
+    const houses = readJsonFile<House[]>('houses.json') || [];
+    const parkingSpots = readJsonFile<ParkingSpot[]>('parking_spots.json') || [];
+
+    if (existingBill.type === 'property_fee' && existingBill.houseId) {
+      const house = houses.find(h => h.id === existingBill.houseId);
+      if (house) {
+        newAmount = calculatePropertyFee(house.area, 2.5);
+      }
+    } else if (existingBill.type === 'water_fee') {
+      newAmount = calculateWaterFee(9.16, 5.0);
+    } else if (existingBill.type === 'electric_fee') {
+      newAmount = calculateElectricFee(229.5, 0.56);
+    } else if (existingBill.type === 'parking_fee' && existingBill.parkingSpotId) {
+      const spot = parkingSpots.find(p => p.id === existingBill.parkingSpotId);
+      if (spot) {
+        newAmount = spot.monthlyFee;
+      }
+    }
+
+    const oldAmount = existingBill.amount;
+    const updatedBill = await billService.update(id, { amount: newAmount }, req.user?.id);
+
+    logOperation('billing', 'recalculate', req.user?.id, {
+      id,
+      billNo: existingBill.billNo,
+      oldAmount,
+      newAmount,
+    });
+
+    logger.info('billing', '账单重算成功', { id, oldAmount, newAmount, userId: req.user?.id });
+    res.json(successResponse({
+      ...updatedBill,
+      oldAmount,
+      newAmount,
+    }));
+  } catch (error) {
+    logger.error('billing', '账单重算失败', { error, userId: req.user?.id });
+    res.status(500).json(errorResponse('账单重算失败'));
+  }
+});
+
+router.put('/:id/cancel', authenticateToken, requireRoles('super_admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const existingBill = await billService.getById(id);
+    if (!existingBill) {
+      logger.warn('billing', '账单不存在', { id, userId: req.user?.id });
+      res.status(404).json(errorResponse('账单不存在'));
+      return;
+    }
+
+    if (existingBill.status === 'paid' || existingBill.status === 'refunded') {
+      logger.warn('billing', '已支付/已退款账单不能取消', { id, userId: req.user?.id });
+      res.status(400).json(errorResponse('已支付/已退款账单不能取消'));
+      return;
+    }
+
+    if (existingBill.status === 'cancelled') {
+      logger.warn('billing', '账单已取消', { id, userId: req.user?.id });
+      res.status(400).json(errorResponse('账单已取消'));
+      return;
+    }
+
+    const cancelledBill = await billService.update(id, { status: 'cancelled' }, req.user?.id);
+
+    logOperation('billing', 'cancel', req.user?.id, {
+      id,
+      billNo: existingBill.billNo,
+      amount: existingBill.amount,
+    });
+
+    logger.info('billing', '取消账单成功', { id, userId: req.user?.id });
+    res.json(successResponse(cancelledBill));
+  } catch (error) {
+    logger.error('billing', '取消账单失败', { error, userId: req.user?.id });
+    res.status(500).json(errorResponse('取消账单失败'));
   }
 });
 

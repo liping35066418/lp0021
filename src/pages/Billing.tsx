@@ -138,7 +138,17 @@ export default function Billing() {
       ]);
 
       if (statsRes.success && statsRes.data) {
-        setStatistics(statsRes.data as BillStatistics);
+        const statsData = statsRes.data as any;
+        if (statsData.byStatus) {
+          setStatistics({
+            unpaid: statsData.byStatus.unpaid?.count || 0,
+            overdue: statsData.byStatus.overdue?.count || 0,
+            paid: statsData.byStatus.paid?.count || 0,
+            monthlyIncome: statsData.byMonth?.[Object.keys(statsData.byMonth)[0]]?.paid || 0,
+          });
+        } else {
+          setStatistics(statsRes.data as BillStatistics);
+        }
       }
       if (billsRes.success && billsRes.data) {
         const billsData = billsRes.data as unknown as { data: Bill[] } | Bill[];
@@ -156,14 +166,23 @@ export default function Billing() {
   };
 
   const fetchPayments = async () => {
+    setLoading(true);
     try {
       const res = await api.billing.payments();
       if (res.success && res.data) {
-        const paymentsData = res.data as unknown as { data: PaymentRecord[] } | PaymentRecord[];
-        setPayments(Array.isArray(paymentsData) ? paymentsData : paymentsData.data);
+        const paymentsData = res.data as unknown as { data: PaymentRecord[]; records: PaymentRecord[] } | PaymentRecord[];
+        if (Array.isArray(paymentsData)) {
+          setPayments(paymentsData);
+        } else if (paymentsData.records) {
+          setPayments(paymentsData.records);
+        } else if (paymentsData.data) {
+          setPayments(paymentsData.data);
+        }
       }
     } catch (error) {
       showToast('error', '加载缴费记录失败');
+    } finally {
+      setLoading(false);
     }
   };
 
