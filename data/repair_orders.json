@@ -1,0 +1,40 @@
+[
+  {
+    "id": "repair_1781126866256_shyjht2nb",
+    "orderNo": "BX202606110001",
+    "ownerId": "owner_1781126732889_3dsmqnbg4",
+    "houseId": "house_1781126733136_v2j589nno",
+    "type": "electrical",
+    "title": "客厅灯不亮了",
+    "description": "昨天晚上突然不亮的，开关没有反应，可能是灯泡坏了或者线路问题，请师傅来检修一下。",
+    "images": [],
+    "status": "assigned",
+    "priority": "medium",
+    "submitTime": "2026-06-10T21:27:46.254Z",
+    "isOverdue": false,
+    "overdueReminderCount": 0,
+    "createdAt": "2026-06-10T21:27:46.254Z",
+    "updatedAt": "2026-06-10T21:27:46.254Z",
+    "workerId": "worker_1781126733136_82j2487mr",
+    "assignTime": "2026-06-10T21:27:46.254Z"
+  },
+  {
+    "orderNo": "BX202606111481",
+    "ownerId": "owner_1781126732889_3dsmqnbg4",
+    "houseId": "house_1781126733136_v2j589nno",
+    "type": "electrical",
+    "title": "测试报修-客厅灯不亮",
+    "description": "客厅灯突然不亮了，需要维修",
+    "images": [],
+    "status": "assigned",
+    "priority": "medium",
+    "workerId": "worker_1781126733136_82j2487mr",
+    "assignTime": "2026-06-10T23:02:43.217Z",
+    "submitTime": "2026-06-10T23:02:43.217Z",
+    "isOverdue": false,
+    "overdueReminderCount": 0,
+    "id": "repair_1781132563217_pqz9dgv0p",
+    "createdAt": "2026-06-10T23:02:43.217Z",
+    "updatedAt": "2026-06-10T23:02:43.217Z"
+  }
+]

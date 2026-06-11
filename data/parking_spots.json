@@ -1,0 +1,65 @@
+[
+  {
+    "id": "parking_1781126733136_2mqa9xm0i",
+    "spotNumber": "A001",
+    "area": "A区地下",
+    "type": "underground",
+    "ownerId": "owner_1781126732889_3dsmqnbg4",
+    "status": "occupied",
+    "monthlyFee": 300,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "parking_1781126733136_1rw0rubvm",
+    "spotNumber": "A002",
+    "area": "A区地下",
+    "type": "underground",
+    "ownerId": "owner_1781126732889_avgzdsgql",
+    "status": "occupied",
+    "monthlyFee": 300,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "parking_1781126733136_w0fw5k915",
+    "spotNumber": "A003",
+    "area": "A区地下",
+    "type": "underground",
+    "ownerId": "owner_1781126732889_avgzdsgql",
+    "status": "occupied",
+    "monthlyFee": 300,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "parking_1781126733136_9kkc6zman",
+    "spotNumber": "B001",
+    "area": "B区地面",
+    "type": "ground",
+    "status": "available",
+    "monthlyFee": 200,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "parking_1781126733136_23mdvcmye",
+    "spotNumber": "B002",
+    "area": "B区地面",
+    "type": "ground",
+    "status": "available",
+    "monthlyFee": 200,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "parking_1781126733136_08bofd8xl",
+    "spotNumber": "C001",
+    "area": "C区机械",
+    "type": "mechanical",
+    "status": "available",
+    "monthlyFee": 150,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  }
+]

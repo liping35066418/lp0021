@@ -1,0 +1,68 @@
+[
+  {
+    "id": "house_1781126733136_v2j589nno",
+    "building": "1号楼",
+    "unit": "1单元",
+    "roomNumber": "101",
+    "floor": 1,
+    "area": 89.5,
+    "houseType": "两室一厅",
+    "ownerId": "owner_1781126732889_3dsmqnbg4",
+    "status": "occupied",
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "house_1781126733136_qmrtifpl7",
+    "building": "1号楼",
+    "unit": "1单元",
+    "roomNumber": "102",
+    "floor": 1,
+    "area": 75.2,
+    "houseType": "两室一厅",
+    "ownerId": "owner_1781126732889_m0api11ro",
+    "status": "occupied",
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "house_1781126733136_am2o4ecub",
+    "building": "2号楼",
+    "unit": "2单元",
+    "roomNumber": "501",
+    "floor": 5,
+    "area": 120.8,
+    "houseType": "三室两厅",
+    "ownerId": "owner_1781126732889_avgzdsgql",
+    "status": "occupied",
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "house_1781126733136_vkmknoe0s",
+    "building": "2号楼",
+    "unit": "2单元",
+    "roomNumber": "502",
+    "floor": 5,
+    "area": 98.6,
+    "houseType": "三室一厅",
+    "ownerId": "owner_1781126732889_avgzdsgql",
+    "status": "rented",
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z",
+    "remark": "出租中"
+  },
+  {
+    "id": "house_1781126733136_yklfqfdvs",
+    "building": "3号楼",
+    "unit": "1单元",
+    "roomNumber": "302",
+    "floor": 3,
+    "area": 65,
+    "houseType": "一室一厅",
+    "ownerId": "",
+    "status": "vacant",
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "worker_1781126733136_82j2487mr",
+    "name": "李师傅",
+    "phone": "13700137001",
+    "specialty": [
+      "electrical",
+      "appliance"
+    ],
+    "status": "available",
+    "currentOrderCount": 2,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:27:46.254Z"
+  },
+  {
+    "id": "worker_1781126733136_1ftoskaya",
+    "name": "王师傅",
+    "phone": "13700137002",
+    "specialty": [
+      "plumbing",
+      "structure"
+    ],
+    "status": "available",
+    "currentOrderCount": 0,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  },
+  {
+    "id": "worker_1781126733136_mpshwjgoh",
+    "name": "张师傅",
+    "phone": "13700137003",
+    "specialty": [
+      "electrical",
+      "plumbing",
+      "other"
+    ],
+    "status": "available",
+    "currentOrderCount": 1,
+    "createdAt": "2026-06-10T21:25:33.136Z",
+    "updatedAt": "2026-06-10T21:25:33.136Z"
+  }
+]

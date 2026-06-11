@@ -1,0 +1,16 @@
+[
+  {
+    "id": "payment_1781132588910_2uyulfp7f",
+    "recordNo": "ZF20260611070308784",
+    "billIds": [
+      "bill_1781126733138_ozpp5ob70"
+    ],
+    "ownerId": "owner_1781126732889_3dsmqnbg4",
+    "amount": 223.75,
+    "paymentMethod": "wechat",
+    "status": "success",
+    "operatorId": "user_1781126732889_5m9efybdy",
+    "createdAt": "2026-06-10T23:03:08.908Z",
+    "updatedAt": "2026-06-10T23:03:08.908Z"
+  }
+]
