@@ -22,7 +22,7 @@ const statusConfig: Record<StatusType, { label: string; className: string }> = {
   occupied: { label: '已入住', className: 'bg-green-100 text-green-700 border-green-200' },
   vacant: { label: '空置', className: 'bg-blue-100 text-blue-700 border-blue-200' },
   rented: { label: '已出租', className: 'bg-purple-100 text-purple-700 border-purple-200' },
-  available: { label: '可用', className: 'bg-green-100 text-green-700 border-green-200' },
+  available: { label: '空闲', className: 'bg-green-100 text-green-700 border-green-200' },
   pending: { label: '待处理', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   assigned: { label: '已派单', className: 'bg-blue-100 text-blue-700 border-blue-200' },
   in_progress: { label: '处理中', className: 'bg-purple-100 text-purple-700 border-purple-200' },

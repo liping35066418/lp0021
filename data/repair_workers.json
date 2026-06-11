@@ -8,9 +8,8 @@
       "appliance"
     ],
     "status": "available",
-    "currentOrderCount": 2,
     "createdAt": "2026-06-10T21:25:33.136Z",
-    "updatedAt": "2026-06-10T21:27:46.254Z"
+    "updatedAt": "2026-06-11T03:40:55.892Z"
   },
   {
     "id": "worker_1781126733136_1ftoskaya",
@@ -35,8 +34,7 @@
       "other"
     ],
     "status": "available",
-    "currentOrderCount": 1,
     "createdAt": "2026-06-10T21:25:33.136Z",
-    "updatedAt": "2026-06-10T21:25:33.136Z"
+    "updatedAt": "2026-06-11T03:41:33.848Z"
   }
 ]

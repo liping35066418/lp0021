@@ -10,6 +10,7 @@ import {
   Radio,
   X,
   Check,
+  Star,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import Layout from '@/components/Layout';
@@ -353,9 +354,9 @@ export default function Workers() {
     },
     {
       key: 'currentOrderCount',
-      title: '当前工单数',
+      title: '当前在手工单数',
       dataIndex: 'currentOrderCount',
-      width: '100px',
+      width: '110px',
       align: 'center',
       render: (value) => (
         <span className={cn(
@@ -365,6 +366,36 @@ export default function Workers() {
           {value as number}
         </span>
       ),
+    },
+    {
+      key: 'completedCount',
+      title: '累计完成',
+      dataIndex: 'completedCount',
+      width: '90px',
+      align: 'center',
+      render: (value) => (
+        <span className="font-medium text-blue-600">{(value as number) ?? 0}</span>
+      ),
+    },
+    {
+      key: 'averageRating',
+      title: '平均评分',
+      dataIndex: 'averageRating',
+      width: '110px',
+      align: 'center',
+      render: (value) => {
+        const rating = value as number | undefined;
+        if (rating === undefined || rating === null) {
+          return <span className="text-gray-400 text-sm">暂无分</span>;
+        }
+        return (
+          <div className="flex items-center justify-center gap-1">
+            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium text-gray-900">{rating.toFixed(1)}</span>
+            <span className="text-xs text-gray-400">/5.0</span>
+          </div>
+        );
+      },
     },
     {
       key: 'status',

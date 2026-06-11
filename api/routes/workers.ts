@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import { authenticateToken, requireRoles, type AuthRequest } from '../middleware/auth.js';
 import { CrudService, successResponse, errorResponse } from '../utils/crud.js';
 import { logger } from '../utils/logger.js';
+import { enrichWorkerWithStats } from '../utils/business.js';
 import type { RepairWorker } from '../types/index.js';
 
 const router = Router();
@@ -23,8 +24,9 @@ router.get('/', authenticateToken, requireRoles('super_admin', 'property_staff')
       [],
       { page: Number(page) || 1, pageSize: Number(pageSize) || 20 }
     );
+    const enrichedData = (result.data as RepairWorker[]).map(w => enrichWorkerWithStats(w));
     logger.info('workers', '查询维修工列表', { filters, userId: req.user?.id });
-    res.json(successResponse(result.data, { total: result.total, page: result.page, pageSize: result.pageSize }));
+    res.json(successResponse(enrichedData, { total: result.total, page: result.page, pageSize: result.pageSize }));
   } catch (error) {
     logger.error('workers', '查询维修工列表失败', { error, userId: req.user?.id });
     res.status(500).json(errorResponse('查询维修工列表失败'));
@@ -42,8 +44,9 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): P
       return;
     }
 
+    const enrichedWorker = enrichWorkerWithStats(worker);
     logger.info('workers', '查询维修工详情', { id, userId: req.user?.id });
-    res.json(successResponse(worker));
+    res.json(successResponse(enrichedWorker));
   } catch (error) {
     logger.error('workers', '查询维修工详情失败', { error, userId: req.user?.id });
     res.status(500).json(errorResponse('查询维修工详情失败'));

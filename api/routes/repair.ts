@@ -3,7 +3,7 @@ import { authenticateToken, requireRoles, type AuthRequest } from '../middleware
 import { CrudService, successResponse, errorResponse } from '../utils/crud.js';
 import { logger } from '../utils/logger.js';
 import { readJsonFile, writeJsonFile } from '../utils/file.js';
-import { generateOrderNo, autoAssignWorker, checkRepairOverdue, detectDuplicateRepairOrder, validateOwnerHouseRelation } from '../utils/business.js';
+import { generateOrderNo, autoAssignWorker, checkRepairOverdue, detectDuplicateRepairOrder, validateOwnerHouseRelation, getWorkerStats, syncWorkerStatusToDb } from '../utils/business.js';
 import type { RepairOrder, RepairWorker } from '../types/index.js';
 
 const router = Router();
@@ -235,8 +235,9 @@ router.put('/:id/assign', authenticateToken, requireRoles('super_admin', 'proper
       return;
     }
 
-    if (newWorker.status !== 'available') {
-      res.status(400).json(errorResponse('该维修工当前不可用'));
+    const newWorkerStats = getWorkerStats(workerId);
+    if (newWorkerStats.effectiveStatus === 'offline') {
+      res.status(400).json(errorResponse('该维修工已离线，无法派单'));
       return;
     }
 
@@ -253,6 +254,11 @@ router.put('/:id/assign', authenticateToken, requireRoles('super_admin', 'proper
     }
 
     writeJsonFile('repair_workers.json', workers);
+
+    if (order.workerId && order.workerId !== workerId) {
+      syncWorkerStatusToDb(order.workerId);
+    }
+    syncWorkerStatusToDb(workerId);
 
     const now = new Date().toISOString();
     const updatedOrder = await repairService.update(
@@ -362,6 +368,7 @@ router.put('/:id/complete', authenticateToken, async (req: AuthRequest, res: Res
       if (workerIndex !== -1 && workers[workerIndex].currentOrderCount > 0) {
         workers[workerIndex].currentOrderCount -= 1;
         writeJsonFile('repair_workers.json', workers);
+        syncWorkerStatusToDb(order.workerId);
       }
     }
 
@@ -467,6 +474,7 @@ router.put('/:id/cancel', authenticateToken, async (req: AuthRequest, res: Respo
       if (workerIndex !== -1 && workers[workerIndex].currentOrderCount > 0) {
         workers[workerIndex].currentOrderCount -= 1;
         writeJsonFile('repair_workers.json', workers);
+        syncWorkerStatusToDb(order.workerId);
       }
     }
 

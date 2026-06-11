@@ -1025,13 +1025,27 @@ export default function Repair() {
             value={selectedWorker}
             onChange={(e) => setSelectedWorker(e.target.value)}
             options={[
-              { value: '', label: '请选择维修工' },
+              { value: '', label: '请选择维修工（按在手单少、评分高优先）' },
               ...workers
                 .filter((w) => w.status !== 'offline')
-                .map((w) => ({
-                  value: w.id,
-                  label: `${w.name} (${w.specialty.join('/')} - 当前${w.currentOrderCount}单)`,
-                })),
+                .sort((a, b) => {
+                  if (a.currentOrderCount !== b.currentOrderCount) {
+                    return a.currentOrderCount - b.currentOrderCount;
+                  }
+                  const ar = a.averageRating ?? -1;
+                  const br = b.averageRating ?? -1;
+                  return br - ar;
+                })
+                .map((w) => {
+                  const ratingText = w.averageRating !== undefined && w.averageRating !== null
+                    ? `⭐${w.averageRating.toFixed(1)}分`
+                    : '暂无评分';
+                  const statusText = w.currentOrderCount === 0 ? '空闲' : '忙碌';
+                  return {
+                    value: w.id,
+                    label: `${w.name} | ${statusText} | 在手${w.currentOrderCount}单 | ${ratingText}`,
+                  };
+                }),
             ]}
           />
         </FormItem>

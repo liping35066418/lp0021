@@ -81,6 +81,8 @@ export interface RepairWorker extends BaseEntity {
   specialty: string[];
   status: 'available' | 'busy' | 'offline';
   currentOrderCount: number;
+  completedCount?: number;
+  averageRating?: number;
 }
 
 export type BillType = 'property_fee' | 'water_fee' | 'electric_fee' | 'parking_fee';

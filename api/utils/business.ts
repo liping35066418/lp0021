@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { readJsonFile } from './file.js';
-import type { RepairWorker, Owner, House, ParkingSpot } from '../types/index.js';
+import { readJsonFile, writeJsonFile } from './file.js';
+import type { RepairWorker, Owner, House, ParkingSpot, RepairOrder } from '../types/index.js';
 
 export function generateOrderNo(prefix: string): string {
   const date = dayjs().format('YYYYMMDD');
@@ -155,4 +155,63 @@ export function cleanImportData<T extends Record<string, unknown>>(
   });
 
   return { valid, invalid };
+}
+
+export interface WorkerStats {
+  completedCount: number;
+  averageRating: number | undefined;
+  effectiveStatus: 'available' | 'busy' | 'offline';
+}
+
+export function getWorkerStats(workerId: string): WorkerStats {
+  const orders = readJsonFile<RepairOrder[]>('repair_orders.json') || [];
+  const workers = readJsonFile<RepairWorker[]>('repair_workers.json') || [];
+  const worker = workers.find(w => w.id === workerId);
+
+  const finishedOrders = orders.filter(
+    o => o.workerId === workerId && (o.status === 'completed' || o.status === 'archived')
+  );
+
+  const completedCount = finishedOrders.length;
+
+  const ratedOrders = finishedOrders.filter(o => typeof o.rating === 'number');
+  let averageRating: number | undefined;
+  if (ratedOrders.length > 0) {
+    const total = ratedOrders.reduce((sum, o) => sum + (o.rating as number), 0);
+    averageRating = Math.round((total / ratedOrders.length) * 100) / 100;
+  }
+
+  let effectiveStatus: 'available' | 'busy' | 'offline' = 'available';
+  if (worker) {
+    if (worker.status === 'offline') {
+      effectiveStatus = 'offline';
+    } else if (worker.currentOrderCount > 0) {
+      effectiveStatus = 'busy';
+    } else {
+      effectiveStatus = 'available';
+    }
+  }
+
+  return { completedCount, averageRating, effectiveStatus };
+}
+
+export function enrichWorkerWithStats<T extends RepairWorker>(worker: T): T & WorkerStats {
+  const stats = getWorkerStats(worker.id);
+  return {
+    ...worker,
+    ...stats,
+    status: stats.effectiveStatus,
+  };
+}
+
+export function syncWorkerStatusToDb(workerId: string): void {
+  const workers = readJsonFile<RepairWorker[]>('repair_workers.json') || [];
+  const index = workers.findIndex(w => w.id === workerId);
+  if (index !== -1) {
+    const stats = getWorkerStats(workerId);
+    if (workers[index].status !== 'offline') {
+      workers[index].status = stats.effectiveStatus;
+      writeJsonFile('repair_workers.json', workers);
+    }
+  }
 }
